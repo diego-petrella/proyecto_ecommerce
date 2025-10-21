@@ -1,34 +1,30 @@
 <?php
-// views/detalle.php
 session_start();
 
-// 1. Incluimos las funciones del modelo
-// Asume que la carpeta 'models' está un nivel arriba de 'views'
+
 require '../models/funciones.php'; 
 
-// 2. Obtener el ID del artículo de la URL
 $articulo_id = $_GET['id'] ?? null;
 
-// Si no hay ID o no es un número válido, redirigimos a la tienda
 if (!$articulo_id || !is_numeric($articulo_id)) {
     header("Location: ../index.php");
     exit;
 }
 
-// 3. Obtener los datos del artículo
+
 $articulo = buscarPorId($articulo_id);
 
-// Si el artículo no existe, mostramos un error o redirigimos
+
 if (!$articulo) {
-    header("Location: ../index.php?error=notfound"); // Podrías redirigir con un mensaje
+    header("Location: ../index.php?error=notfound");
     exit;
 }
 
-// Variables de sesión para la barra de navegación (solo para el display)
+
 $usuario_logueado = isset($_SESSION['usuario_id']);
 $cliente_email = $_SESSION['usuario_email'] ?? null;
 
-// Formato de precio
+
 $precio_formateado = number_format($articulo["precio"], 2, ',', '.');
 $marca_nombre = $articulo["nombre_categoria"] ?? 'Sin Marca';
 

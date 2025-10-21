@@ -18,22 +18,22 @@ if ($usuario) {
     $_SESSION['usuario_rol_id'] = $usuario['id_rol'];
    
     if ($usuario['id_rol'] == 1) {
-        // Administrador
+        vaciarCarrito();
+        
         header("Location: /programacion2/articulos/views/panel_admin.php"); 
         
     } elseif ($usuario['id_rol'] == 2) {
-        // Cliente Final
-        header("Location: /programacion2/articulos/index.php"); // Redirige a la Tienda
+        header("Location: /programacion2/articulos/index.php"); 
         
     } else {
-        // Rol no reconocido, redirige a la tienda por defecto
+      
         header("Location: /programacion2/articulos/index.php");
     }
     
     exit;
 
 } else {
-    // 5. FALLO DE AUTENTICACIÓN
+    //FALLO DE AUTENTICACIÓN
     $_SESSION['login_error'] = "Email o contraseña incorrectos.";
     header("Location: /programacion2/articulos/views/login.php");
     exit;

@@ -18,12 +18,16 @@ $carrito = $_SESSION['carrito'] ?? [];
 $productos_en_carrito = [];
 $total_general = 0;
 
+
 if (!empty($carrito)) {
     // 1. Obtener la lista de IDs del carrito (las claves del array)
     $product_ids = array_keys($carrito);
+     
 
     // 2. Obtener todos los datos de los productos con una consulta eficiente
     $productos_data = obtenerProductosPorListaDeIds($product_ids);
+
+   
 
     // 3. Unir los datos de la DB con las cantidades de la sesión
     foreach ($carrito as $id => $cantidad) {
@@ -36,7 +40,8 @@ if (!empty($carrito)) {
                 'id' => $id,
                 'nombre' => $producto['nombre'],
                 'precio' => $producto['precio'],
-                'marca' => $producto['nombre_marca'],
+                'marca' => $producto['nombre_categoria'],
+                'imagen' => $producto['imagen'],
                 'cantidad' => $cantidad,
                 'stock' => $producto['stock'],
                 'subtotal' => $subtotal,
@@ -98,7 +103,7 @@ if (!empty($carrito)) {
                 <div class="col-lg-8">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <!-- El formulario principal ahora SOLO maneja la actualización de cantidades -->
+                            
                             <form action="../controllers/carrito.php" method="POST">
                                 <input type="hidden" name="action" value="update_all"> 
                                 <ul class="list-group list-group-flush">
@@ -106,7 +111,7 @@ if (!empty($carrito)) {
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             
                                             <div class="d-flex align-items-center flex-grow-1">
-                                                <img src="../assets/img/producto_<?php echo $item['id']; ?>.jpg" 
+                                                <img src="../assets/img/<?php echo htmlspecialchars($item['imagen'])?>" 
                                                     alt="<?php echo htmlspecialchars($item['nombre']); ?>" 
                                                     class="rounded me-3" 
                                                     style="width: 60px; height: 60px; object-fit: cover;"
@@ -120,14 +125,12 @@ if (!empty($carrito)) {
                                             
                                             <!-- Controles de Cantidad y Eliminación -->
                                             <div class="d-flex align-items-center">
-                                                
-                                                <!-- INICIO: GRUPO DE CONTROL DE CANTIDAD (Estilo Input Group) -->
                                                 <div class="d-flex me-4" style="width: 150px;"> 
                                                     
-                                                    <!-- FORMULARIO 1: ELIMINAR 1 UNIDAD (Botón Restar) -->
+                                                    <!-- ELIMINAR DE A UNO -->
                                                     <form action="../controllers/carrito.php" method="POST">
                                                         <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                                        <input type="hidden" name="accion" value="remove_one"> 
+                                                        <input type="hidden" name="accion" value="eliminar_uno"> 
                                                         <button type="submit" 
                                                             name="eliminarUno"  
                                                             class="btn btn-outline-secondary btn-sm rounded-end-0 border-end-0" 
@@ -148,10 +151,10 @@ if (!empty($carrito)) {
                                                         style="width: 40px; padding: 0; z-index: 1;"
                                                     >
                                                     
-                                                    <!-- FORMULARIO 2: AGREGAR 1 UNIDAD (Botón Sumar) -->
+                                                    <!-- AGREGAR DE A UNO -->
                                                     <form action="../controllers/carrito.php" method="POST">
                                                         <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                                        <input type="hidden" name="accion" value="add_one"> 
+                                                        <input type="hidden" name="accion" value="agregar_uno"> 
                                                         <button type="submit" 
                                                             name="agregarUno"  
                                                             class="btn btn-outline-secondary btn-sm rounded-start-0 border-start-0" 
@@ -162,14 +165,11 @@ if (!empty($carrito)) {
                                                         </button>
                                                     </form>
                                                 </div> 
-                                                <!-- FIN: GRUPO DE CONTROL DE CANTIDAD -->
-
-                                                <!-- Subtotal -->
-                                                <div class="text-end me-3" style="width: 100px;">
+                                                    <div class="text-end me-3" style="width: 100px;">
                                                     <span class="fw-bold">$<?php echo number_format($item['subtotal'], 2, ',', '.'); ?></span>
                                                 </div>
 
-                                                <!-- FORMULARIO 3: ELIMINAR PRODUCTO COMPLETO (Botón Papelera) -->
+                                                <!-- ELIMINAR PRODUCTO COMPLETO -->
                                                 <form action="../controllers/carrito.php" method="POST" class="d-inline">
                                                     <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
                                                     <input type="hidden" name="accion" value="eliminar"> 
@@ -188,7 +188,7 @@ if (!empty($carrito)) {
                                     <?php } ?>
                                 </ul>
                             
-                                <!-- BOTON ACTULIZAR (Sigue dentro del formulario principal) -->
+                                
                                 <div class="p-3 d-flex justify-content-between">
                                    
                                     <a href="../index.php" class="btn btn-outline-primary">
@@ -200,7 +200,7 @@ if (!empty($carrito)) {
                     </div>
                 </div>
 
-                <!-- Columna de Resumen (Total) -->
+                <!-- RESUMEN -->
                 <div class="col-lg-4 mt-4 mt-lg-0">
                     <div class="card bg-light shadow-sm">
                         <div class="card-body">

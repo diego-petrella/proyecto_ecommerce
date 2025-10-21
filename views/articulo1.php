@@ -6,60 +6,53 @@ rolRequerido(1);
 
 require "../models/funciones.php";
 
-// 1. OBTENER ID y ACCIÓN
+
 $id = isset($_GET["id"]) ? $_GET["id"] : 0;
 $action = $_GET['action'] ?? null;
 $token = md5(session_id());
 
-// Definimos la ruta de redirección
+
 $panel_admin = '/programacion2/articulos/views/panel_admin.php';
 
-// 2. VALIDACIÓN DE REDIRECCIÓN (Solo se aplica a CREATE)
-// Si la acción es CREAR, validamos el token. 
-// Si la acción es EDITAR (solo viene con ID), permitimos el paso.
-if ($action === 'create') {
+if ($action === 'nuevo') {
     if ($_GET['token'] !== $token) {
         header("Location: " . $panel_admin . "?error=token");
         exit;
     }
-} elseif ($id == 0 && $action !== 'create') {
-    // Si no hay ID y no se especificó 'create', redirigimos.
+} elseif ($id == 0 && $action !== 'nuevo') {
+    //SI NO HAY ID Y NO SE SELECCIONO NUEVO
     header("Location: " . $panel_admin);
     exit;
 }
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol_id'] != 1) {
-    // Limpiamos la sesión si es un intento de acceso no autorizado
+    //ACCESO NO AUTRIZADO
     session_unset();
     session_destroy();
-    
-    // Redirigimos al formulario de login
     header("Location: ../views/login.php");
     exit;
 }
-// Asumimos que también necesitarás cargar la lista de marcas para el <select>
-$marcas = obtenerTodasLasMarcas(); 
 
-// 3. LÓGICA DE CARGA DE DATOS
+$categorias_select = obtenerCategorias(); 
+
 if ($id != 0) {
-    // Lo vamos a buscar a la base de datos (MODO EDICIÓN)
+    
     $articulo = buscarPorId($id);
     
-    // Si la búsqueda falla, redirigimos
     if ($articulo === false) {
-        header("Location: " . $panel_admin); // Redirección corregida
+        header("Location: " . $panel_admin);
         exit; 
     }
     $titulo = "Modificar Artículo";
 } else {
-    // Si es nuevo (MODO CREACIÓN), creamos un articulo vacio
+    
     $articulo = [
         "nombre" => "",
         "precio" => "", 
         "id_categoria" => "",
         "imagen" => "",
         "descripcion_corta" => "",
-        "stock" => "", // Agregamos el campo de stock
+        "stock" => "",
     ];
     $titulo = "Nuevo Artículo";
 }
@@ -133,21 +126,16 @@ if ($id != 0) {
                 </div>
 
                 <div class="mb-4">
-                    <label for="id_categoria" class="form-label d-block">Categoria:</label>
-                    <div class="input-group">
-                        <select class="form-select" id="id_categoria" name="id_categoria" required>
-                            <option value="">Seleccione una Categoria</option>
-                            <?php 
-                            foreach ($marcas as $marca) { 
-                                $selected = ($marca['id'] == $articulo['id_categoria']) ? 'selected' : '';
-                                echo "<option value='{$marca['id']}' {$selected}>{$marca['nombre']}</option>";
-                            } 
-                            ?>
-                        </select>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#nuevaMarcaModal" title="Agregar nueva marca">
-                            <i class="bi bi-plus-circle"></i>
-                        </button>
-                    </div>
+                    <label for="id_categoria" class="form-label d-block">Categoría:</label>
+                    <select class="form-select" id="id_categoria" name="id_categoria" required>
+                        <option value="">Seleccione una Categoría</option>
+                        <?php 
+                        foreach ($categorias_select as $categoria) { 
+                            $selected = ($categoria['id'] == $articulo['id_categoria']) ? 'selected' : '';
+                            echo "<option value='{$categoria['id']}' {$selected}>{$categoria['nombre']}</option>";
+                        } 
+                        ?>
+                    </select>
                 </div>
 
                 <div class="text-center mt-4">
@@ -162,53 +150,7 @@ if ($id != 0) {
             
         </div>
     </div>
-    
-    <div class="modal fade" id="nuevaMarcaModal" tabindex="-1" aria-labelledby="nuevaMarcaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="nuevaMarcaModalLabel">Agregar Nueva Marca</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formNuevaMarca">
-                        <div class="mb-3">
-                            <label for="nombre_marca" class="form-label">Nombre de la Marca</label>
-                            <input type="text" class="form-control" id="nombre_marca" name="nombre_marca" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnGuardarMarca">Guardar Marca</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('btnGuardarMarca').addEventListener('click', function() {
-            var nombreMarca = document.getElementById('nombre_marca').value;
-
-            if (nombreMarca) {
-                // Aquí deberías usar AJAX para enviar el nombre de la marca a un nuevo controlador
-                // (por ejemplo, 'guardar_marca.php') y luego actualizar el select.
-                // Como este código es solo para el front-end, simulo la acción.
-                
-                var selectMarca = document.getElementById('id_categoria');
-                var nuevaOpcion = document.createElement('option');
-                nuevaOpcion.value = 'nuevo_id_generado'; // Este ID debe ser real
-                nuevaOpcion.text = nombreMarca;
-                nuevaOpcion.selected = true;
-                selectMarca.appendChild(nuevaOpcion);
-
-                // Cierra el modal
-                var modal = bootstrap.Modal.getInstance(document.getElementById('nuevaMarcaModal'));
-                modal.hide();
-                document.getElementById('nombre_marca').value = ''; // Limpia el input
-            }
-        });
-    </script>
 </body>
 </html>

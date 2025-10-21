@@ -7,21 +7,30 @@ rolRequerido(1);
 
 require "../models/funciones.php";
 
+//PAGINACIÓN ---
+$items_por_pagina = 8;
+$pagina_actual = isset($_GET['p']) ? (int)$_GET['p'] : 1;
+$offset = ($pagina_actual - 1) * $items_por_pagina;
 
-// 1. LÓGICA DE FILTRADO
-// Se capturan los filtros de la URL (GET) si existen.
+//FILTRADO
 $filtro_nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : "";
-$filtro_precio_min = isset($_GET["precio_min"]) ? $_GET["precio_min"] : null;
 $filtro_marca = isset($_GET["id_categoria"]) ? $_GET["id_categoria"] : "";
 
-// 2. OBTENER ARTÍCULOS CON FILTROS
-// Debes actualizar tu función obtenerArticulos() para que acepte estos parámetros.
-// Por ahora, pasamos las variables; si están vacías, la función puede ignorarlas.
-$articulos = obtenerArticulos($filtro_nombre, $filtro_marca); 
+//OBTENER DATOS
+$total_articulos = contarTotalArticulos($filtro_nombre, $filtro_marca); 
+$total_paginas = ceil($total_articulos / $items_por_pagina);
 
-// (Opcional: Obtener una lista de categorías para el <select> si es necesario)
-// $categorias = obtenerCategorias();
+
+$articulos = obtenerArticulos($filtro_nombre, $filtro_marca, $items_por_pagina, $offset); 
+$categorias = obtenerCategorias(); 
+
 $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
+
+//Para mantener los filtros en los enlaces de paginación
+$filtros_query = http_build_query([
+    'nombre' => $filtro_nombre,
+    'id_categoria' => $filtro_marca
+]);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -36,7 +45,12 @@ $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
 
     <header class="bg-dark text-white p-3 shadow-sm mb-4">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <h1 class="h4 m-0"><i class="bi bi-box-seam me-2"></i> Panel de Artículos</h1>
+            <h1 class="h4 m-0">
+                <i class="bi bi-box-seam me-2"></i> Panel de Artículos
+                <a href="../index.php" class="btn btn-outline-info btn-sm ms-3" title="Ir a la página principal">
+                    <i class="bi bi-house-door-fill"></i> Home
+                </a>
+            </h1>
             <div class="d-flex align-items-center">
                 <span class="text-white-50 me-3 small">
                     <i class="bi bi-person-fill"></i> Sesión: <?php echo htmlspecialchars($admin_email); ?>
@@ -51,40 +65,46 @@ $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
     <div class="container my-5">
         
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Listado de Artículos (<?php echo count($articulos); ?>)</h2>
+            <h2 class="mb-0">Listado de Artículos (<?php echo $total_articulos; ?>)</h2>
             
-            <a href="../views/articulo1.php?action=create&token=<?php echo md5(session_id()); ?>" class="btn btn-success">
-                <i class="bi bi-plus-circle me-2"></i> Agregar Nuevo
-            </a>
-        </div>
+            <div>
+                <a href="../views/gestion_pedidos.php" class="btn btn-warning me-3">
+                    <i class="bi bi-receipt-cutoff me-2"></i> Gestión de Pedidos
+                </a>
+                
+                <a href="../views/categorias.php" class="btn btn-info me-3">
+                    <i class="bi bi-tags-fill me-2"></i> Gestión de Categorías
+                </a>
+                
+                <a href="../views/articulo1.php?action=nuevo&token=<?php echo md5(session_id()); ?>" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-2"></i> Agregar Nuevo
+                </a>
+            </div>
+            </div>
 
         <div class="card p-3 mb-4 shadow-sm">
             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="GET" class="row g-3 align-items-end">
                 
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label for="nombre" class="form-label visually-hidden">Buscar Nombre</label>
                     <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Buscar por Nombre" 
                         value="<?php echo htmlspecialchars($filtro_nombre); ?>">
                 </div>
                 
-                <div class="col-md-3">
-                    <label for="precio_min" class="form-label visually-hidden">Otro Filtro</label>
-                    <input type="number" step="0.01" class="form-control" id="precio_min" name="precio_min" placeholder="Precio Mínimo"
-                        value="<?php echo htmlspecialchars($filtro_precio_min); ?>">
-                </div>
-                
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="id_categoria" class="form-label visually-hidden">Categoría</label>
                     <select class="form-select" id="id_categoria" name="id_categoria">
                         <option value="">Todas las Categorías</option>
-                        <option value="1" <?php echo ($filtro_marca == '1' ? 'selected' : ''); ?>>Samsung</option>
-                        <option value="2" <?php echo ($filtro_marca == '2' ? 'selected' : ''); ?>>Apple</option>
-                        <option value="3" <?php echo ($filtro_marca == '3' ? 'selected' : ''); ?>>Motorola</option>
-                        <option value="4" <?php echo ($filtro_marca == '4' ? 'selected' : ''); ?>>Xiaomi</option>
+                        <?php 
+                        foreach ($categorias as $categoria) { 
+                            $selected = ($filtro_marca == $categoria['id']) ? 'selected' : '';
+                            echo "<option value='{$categoria['id']}' {$selected}>" . htmlspecialchars($categoria['nombre']) . "</option>";
+                        }
+                        ?>
                     </select>
                 </div>
                 
-                <div class="col-md-2 d-flex">
+                <div class="col-md-3 d-flex">
                     <button type="submit" class="btn btn-primary w-100 me-2">
                         <i class="bi bi-search"></i> Filtrar
                     </button>
@@ -120,6 +140,7 @@ $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
                     else:
                         foreach($articulos as $articulo) { 
                             $precio_formateado = number_format($articulo["precio"], 2, ',', '.');
+                          
                             $imagen_src = !empty($articulo["imagen"]) ? "../assets/img/" . htmlspecialchars($articulo["imagen"]) : "https://via.placeholder.com/80";
                     ?>
                         <tr>
@@ -128,7 +149,7 @@ $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
                             <td><?php echo htmlspecialchars($articulo["nombre"]) ?></td>
                             <td><?php echo htmlspecialchars($articulo["stock"] ?? 'N/A') ?></td>
                             <td>$<?php echo $precio_formateado ?></td>
-                            <td><?php echo htmlspecialchars($articulo["nombre_categoria"]) ?></td>
+                            <td><?php echo htmlspecialchars($articulo["nombre_categoria"] ?? 'N/A') ?></td>
                             
                             <td class="text-center">
                                 <a href="../views/articulo1.php?id=<?php echo htmlspecialchars($articulo["id"]) ?>" class="btn btn-sm btn-warning" title="Modificar Artículo">
@@ -137,9 +158,9 @@ $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
                             </td>
                             
                             <td class="text-center">
-                                <a href="../controllers/articulo_eliminar.php?id=<?php echo htmlspecialchars($articulo["id"]) ?>" 
-                                    class="btn btn-sm btn-danger" 
-                                    onclick="return confirm('¿Estás seguro de que deseas eliminar este artículo?')" 
+                                
+                                <a class="btn btn-sm btn-danger" 
+                                onclick="eliminar(<?php echo htmlspecialchars($articulo['id']); ?>, event.currentTarget)"
                                     title="Eliminar Artículo">
                                     <i class="bi bi-trash"></i>
                                 </a>
@@ -152,8 +173,61 @@ $admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
                 </tbody>
             </table>
         </div>
+
+        <?php if ($total_paginas > 1): ?>
+        <nav aria-label="Paginación de artículos" class="mt-4">
+            <ul class="pagination justify-content-center">
+                
+                <li class="page-item <?php echo ($pagina_actual <= 1) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?p=<?php echo $pagina_actual - 1; ?>&<?php echo $filtros_query; ?>">Anterior</a>
+                </li>
+                
+                <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                    <li class="page-item <?php echo ($i == $pagina_actual) ? 'active' : ''; ?>">
+                        <a class="page-link" href="?p=<?php echo $i; ?>&<?php echo $filtros_query; ?>"><?php echo $i; ?></a>
+                    </li>
+                <?php endfor; ?>
+                
+                <li class="page-item <?php echo ($pagina_actual >= $total_paginas) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?p=<?php echo $pagina_actual + 1; ?>&<?php echo $filtros_query; ?>">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+        <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function eliminar(id, botonElemento) {
+
+        let filaAEliminar = botonElemento.closest('tr');
+        
+        let datos = JSON.stringify({
+        "id" : id
+        });
+        fetch("../controllers/articulo_eliminar.php", {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body : datos})
+        .then(response => response.json())
+        .then(function(data){
+        
+        if (data.estado === 'ok') { 
+            
+            //IMPLEMENTACIÓN DEL REMOVE
+            if (filaAEliminar) {
+                filaAEliminar.remove(); 
+            }
+            alert(data.mensaje || "Artículo eliminado con éxito."); 
+            
+        } else {
+            alert("Error al eliminar: " + data.mensaje);
+        }
+    })
+    .catch(error => alert("Fallo en la comunicación AJAX."));
+    }
+    </script>
 </body>
 </html>

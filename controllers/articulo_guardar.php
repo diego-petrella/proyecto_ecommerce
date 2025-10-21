@@ -40,7 +40,7 @@ if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] !== UPLOAD_ERR_NO_FIL
             }
         }
     } else {
-        // FALLO EN LA SUBIDA INICIAL (ej: tamaño, archivo corrupto)
+        
         error_log("Fallo de subida: Código de error $error_codigo. Archivo: $nombre_archivo_original");
     }
 }
@@ -70,10 +70,9 @@ if (isset($_POST["id"])) {
     $articulo["id"] = (int)$_POST["id"];
 }
 
-// 4. LLAMADA A LA FUNCIÓN DEL MODELO
 guardarArticulo($articulo, $hay_nueva_imagen);
 
-// 5. REDIRECCIÓN FINAL
-header("Location: ../index.php");
+
+header("Location: ../views/panel_admin.php");
 exit;
 

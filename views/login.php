@@ -1,28 +1,26 @@
 <?php
-// 1. Iniciar la sesión para poder leer mensajes de error
 session_start();
 
-// 💥 LÓGICA DE REDIRECCIÓN SI YA ESTÁ AUTENTICADO 💥
 if (isset($_SESSION['usuario_id'])) {
     
-    // Si ya existe una sesión, verificamos el rol para redirigir al lugar correcto
-    $rol_id = $_SESSION['usuario_rol_id'] ?? 2; // Asumimos cliente (2) si el rol no está definido
+    
+    $rol_id = $_SESSION['usuario_rol_id'] ?? 2; 
 
     if ($rol_id == 1) {
-        // Rol 1: Administrador
+        //1= Administrador
         header("Location: ./panel_admin.php"); 
         exit;
     } else {
-        // Rol 2: Cliente Final
+        // 2= Cliente Final
         header("Location:/programacion2/articulos/index.php"); 
         exit;
     }
 }
 
-// Capturamos el mensaje de error si el controlador lo almacenó
+
 $error_message = $_SESSION['login_error'] ?? null; 
 
-// Limpiamos la variable de sesión después de mostrar el mensaje
+
 unset($_SESSION['login_error']); 
 ?>
 <!DOCTYPE html>
@@ -34,9 +32,8 @@ unset($_SESSION['login_error']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* CSS para centrar el contenido verticalmente y dar altura */
         .login-container {
-            min-height: 80vh; /* Mínimo 80% del alto de la ventana */
+            min-height: 80vh; 
             display: flex;
             align-items: center;
             justify-content: center;

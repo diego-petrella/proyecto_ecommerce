@@ -1,14 +1,16 @@
 <?php
-session_start();
-
-define('APP_INCLUDED', true);
-
-// 1. VERIFICACIÓN DE ADMINISTRADOR LOGUEADO
-if (isset($_SESSION['usuario_id']) && ($_SESSION['usuario_rol_id'] == 1)) {
-    // Redirige al administrador a su panel
-    header("Location: /programacion2/articulos/views/panel_admin.php");
-    exit;
+if (!defined('APP_INCLUDED')) {
+    define('APP_INCLUDED', true);
+}
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-include './views/productos.php'; 
+//Controlador de Catálogo
+require "./controllers/catalogo.php";
+
+//Incluir las plantillas
+require "./includes/header.php"; 
+require "./views/catalogo.php";
+require "./includes/footer.php"; 
 ?>
