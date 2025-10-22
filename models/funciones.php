@@ -123,23 +123,18 @@ function eliminarArticulo($id) {
     $sql = "DELETE FROM articulos WHERE id = :id";
     $stmt = $pdo->prepare($sql);
     
-    //INTENTA ELIMINAR
     try {
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-        
-        //CONT ROW VERIFICA SI SE MODIFICO 1 REGISTRO
-        if ($stmt->rowCount() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return $stmt->rowCount() > 0; 
 
     } catch (PDOException $e) {
-        error_log("Error de BD (DELETE artículo ID $id): " . $e->getMessage());
+        
+        error_log("Error de BD al eliminar artículo ID $id: " . $e->getMessage());
         return false; 
     }
 }
+
 function buscarPorId($id) {
   $pdo = getConnection();
   $sql = "SELECT A.*, C.nombre AS nombre_categoria  FROM articulos A INNER JOIN categorias C on (A.id_categoria = C.id) WHERE A.id = ? ";

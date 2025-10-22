@@ -143,7 +143,7 @@ $filtros_query = http_build_query([
                           
                             $imagen_src = !empty($articulo["imagen"]) ? "../assets/img/" . htmlspecialchars($articulo["imagen"]) : "https://via.placeholder.com/80";
                     ?>
-                        <tr>
+                        <tr id="fila_<?php echo htmlspecialchars($articulo['id']); ?>">
                             <td><?php echo htmlspecialchars($articulo["id"]) ?></td>
                             <td><img src="<?php echo $imagen_src; ?>" alt="Imagen del producto" style="max-width: 80px; height: auto;"></td>
                             <td><?php echo htmlspecialchars($articulo["nombre"]) ?></td>
@@ -157,10 +157,10 @@ $filtros_query = http_build_query([
                                 </a>
                             </td>
                             
-                            <td class="text-center">
+                            <td   class="text-center">
                                 
                                 <a class="btn btn-sm btn-danger" 
-                                onclick="eliminar(<?php echo htmlspecialchars($articulo['id']); ?>, event.currentTarget)"
+                                onclick="eliminar(<?php echo htmlspecialchars($articulo['id']); ?>)"
                                     title="Eliminar Artículo">
                                     <i class="bi bi-trash"></i>
                                 </a>
@@ -198,36 +198,40 @@ $filtros_query = http_build_query([
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    function eliminar(id, botonElemento) {
-
-        let filaAEliminar = botonElemento.closest('tr');
-        
+    function eliminar(id) {
         let datos = JSON.stringify({
         "id" : id
         });
+        
         fetch("../controllers/articulo_eliminar.php", {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json'
         },
         body : datos})
-        .then(response => response.json())
-        .then(function(data){
+        .then(response => response.json()).then(function(data) { 
         
-        if (data.estado === 'ok') { 
+        if (data.estado === 'ok') {
             
-            //IMPLEMENTACIÓN DEL REMOVE
+            
+            let idBuscado = "fila_" + id; 
+            let filaAEliminar = document.getElementById(idBuscado);
+            
             if (filaAEliminar) {
                 filaAEliminar.remove(); 
+                alert(data.mensaje || "Artículo eliminado con éxito.");
+            } else {
+                
+                alert("Éxito en BD, pero la vista no se pudo actualizar.");
             }
-            alert(data.mensaje || "Artículo eliminado con éxito."); 
             
         } else {
-            alert("Error al eliminar: " + data.mensaje);
+            
+            alert("Error de BD: " + data.mensaje);
         }
     })
-    .catch(error => alert("Fallo en la comunicación AJAX."));
-    }
+    .catch(error => alert("Fallo de comunicación AJAX: " + error.message));
+}
     </script>
 </body>
 </html>
