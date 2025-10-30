@@ -1,10 +1,12 @@
 <?php
 //FILTRADO
+
+
+
 $base_url = htmlspecialchars($_SERVER["PHP_SELF"]); 
 $filtro_marca = $_GET['id_categoria'] ?? '';
 $filtro_nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : "";
 $pagina_actual = (int)($_GET['p'] ?? 1); 
-
 
 $titulo_actual = "Todos los Productos";
 if (!empty($filtro_marca)) {
@@ -25,7 +27,13 @@ if (!empty($filtro_marca)) {
                 
                 <input type="text" class="form-control" name="nombre" placeholder="Buscar productos por nombre..." 
                        value="<?php echo htmlspecialchars($filtro_nombre); ?>">
-                <button class="btn btn-primary" type="submit"><i class="bi bi-search me-2"></i> Buscar</button>
+                
+                <?php if (!empty($filtro_nombre)): ?>
+        <a href="<?php echo $base_url; ?>?id_categoria=<?php echo htmlspecialchars($filtro_marca); ?>" class="btn btn-outline-danger" title="Limpiar búsqueda">
+            <i class="bi bi-x-lg"></i>
+        </a>
+    <?php endif; ?>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-search me-2"></i> Buscar</button>
             </form>
         </div>
         
@@ -103,3 +111,4 @@ if (!empty($filtro_marca)) {
         </div>
     </div>
     </div>
+    

@@ -75,7 +75,7 @@ if (!empty($carrito)) {
                         <i class="bi bi-box-arrow-right"></i> Salir
                     </a>
                 <?php } else { ?>
-                    <a class="btn btn-primary me-3" href="login.php" title="Iniciar Sesión o Registrarse">
+                    <a class="btn btn-primary me-3" href="login.php?url_destino=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" title="Iniciar Sesión o Registrarse">
                         <i class="bi bi-person"></i> Iniciar Sesión
                     </a>
                 <?php } ?>

@@ -16,6 +16,18 @@ if ($usuario) {
     $_SESSION['usuario_id'] = $usuario['id'];
     $_SESSION['usuario_email'] = $usuario['email'];
     $_SESSION['usuario_rol_id'] = $usuario['id_rol'];
+
+    if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
+        
+        $redirect_url = $_POST['redirect_url'];
+
+        // Verificación de seguridad simple:
+        
+        if (substr($redirect_url, 0, 1) === '/') {
+            header("Location: " . $redirect_url);
+            exit; 
+        }
+    }
    
     if ($usuario['id_rol'] == 1) {
         vaciarCarrito();

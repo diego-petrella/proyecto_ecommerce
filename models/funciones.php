@@ -457,8 +457,8 @@ function guardarOrdenDeVenta($id_usuario, $datos_envio, $carrito, $subtotal, $to
     }
 }
 
-function obtenerTodosLosPedidos() {
-    $pdo = getConnection();
+function obtenerTodosLosPedidos($fecha_inicio = null, $fecha_fin = null) {
+    $pdo = getConnection(); 
     
     $sql = "SELECT 
                 p.id AS pedido_id,
@@ -469,13 +469,67 @@ function obtenerTodosLosPedidos() {
                 p.telefono_contacto,
                 u.email AS email_cliente
             FROM pedidos p
-            JOIN usuarios u ON p.id_usuario = u.id
-            ORDER BY p.fecha_pedido DESC";
-            
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            JOIN usuarios u ON p.id_usuario = u.id";
+    $params = []; 
+    $clausulas_where = [];
+
+    // Añadir filtro de fecha de inicio
+    if (!empty($fecha_inicio)) {
+        // Usamos DATE() para comparar solo la parte de la fecha.
+        // Usamos placeholders con nombre para PDO
+        $clausulas_where[] = "DATE(p.fecha_pedido) >= :fecha_inicio";
+        $params[':fecha_inicio'] = $fecha_inicio;
+    }
+
+    // Añadir filtro de fecha de fin
+    if (!empty($fecha_fin)) {
+        $clausulas_where[] = "DATE(p.fecha_pedido) <= :fecha_fin";
+        $params[':fecha_fin'] = $fecha_fin;
+    }
+
+    // Si hay filtros, los añadimos a la consulta
+    if (!empty($clausulas_where)) {
+        $sql .= " WHERE " . implode(" AND ", $clausulas_where);
+    }
+
+    // Ordenar por fecha más reciente
+    $sql .= " ORDER BY p.fecha_pedido DESC";
+
+    try {
+        $stmt = $pdo->prepare($sql);
+        
+        // Ejecutar con los parámetros (PDO los maneja)
+        // $params estará vacío si no hay filtros, lo cual es correcto
+        $stmt->execute($params); 
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    } catch (PDOException $e) {
+        // Manejo básico de errores para PDO
+        error_log("Error en obtenerTodosLosPedidos (PDO): " . $e->getMessage());
+        return []; // Retorna un array vacío en caso de error
+    }
 }
+
+// function obtenerTodosLosPedidos() {
+//     $pdo = getConnection();
+    
+//     $sql = "SELECT 
+//                 p.id AS pedido_id,
+//                 p.fecha_pedido,
+//                 p.total,
+//                 p.nombre_cliente,
+//                 p.direccion_envio,
+//                 p.telefono_contacto,
+//                 u.email AS email_cliente
+//             FROM pedidos p
+//             JOIN usuarios u ON p.id_usuario = u.id
+//             ORDER BY p.fecha_pedido DESC";
+            
+//     $stmt = $pdo->prepare($sql);
+//     $stmt->execute();
+//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+// }
 
 
 function obtenerDetallePedido($id_pedido) {

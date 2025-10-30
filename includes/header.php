@@ -2,7 +2,9 @@
 $usuario_logueado = isset($_SESSION['usuario_id']);
 $cliente_email = $_SESSION['usuario_email'] ?? null;
 $es_admin = (isset($_SESSION['usuario_rol_id']) && $_SESSION['usuario_rol_id'] == 1); 
+
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -63,3 +65,4 @@ $es_admin = (isset($_SESSION['usuario_rol_id']) && $_SESSION['usuario_rol_id'] =
 
 <div class="container">
     <h1 class="mb-4 text-center">Nuestros Artículos</h1>
+    

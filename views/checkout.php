@@ -13,8 +13,11 @@ require "../models/funciones.php";
 
 
 if (!isset($_SESSION['usuario_id']) || empty($_SESSION['carrito'])) {
-    header('Location: login.php'); 
-    exit;
+   $url_destino = urlencode($_SERVER['REQUEST_URI']);
+
+    header('Location: login.php?url_destino=' . $url_destino);
+    exit; // Detenemos la ejecución de esta página
+   
 }
 
 $id_usuario = $_SESSION['usuario_id'];

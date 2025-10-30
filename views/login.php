@@ -22,6 +22,13 @@ $error_message = $_SESSION['login_error'] ?? null;
 
 
 unset($_SESSION['login_error']); 
+
+$url_destino = '';
+if (isset($_GET['url_destino'])) {
+    // Usamos htmlspecialchars por seguridad al ponerlo en el 'value' del input
+    // urldecode es importante por si la URL viene codificada
+    $url_destino = htmlspecialchars(urldecode($_GET['url_destino']));
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -74,6 +81,8 @@ unset($_SESSION['login_error']);
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
                         
+                        <input type="hidden" name="redirect_url" value="<?php echo $url_destino; ?>">
+
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
                         </button>
