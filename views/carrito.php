@@ -8,7 +8,6 @@ if (session_status() == PHP_SESSION_NONE) {
 
 require '../models/funciones.php'; 
 
-// Variables de sesión para el Header
 $usuario_logueado = isset($_SESSION['usuario_id']);
 $cliente_email = $_SESSION['usuario_email'] ?? null;
 $total_items_carrito = contarProductosCarrito();
@@ -20,16 +19,14 @@ $total_general = 0;
 
 
 if (!empty($carrito)) {
-    // 1. Obtener la lista de IDs del carrito (las claves del array)
+    //Obtener la lista de IDs del carrito
     $product_ids = array_keys($carrito);
      
 
-    // 2. Obtener todos los datos de los productos con una consulta eficiente
+    //Obtener todos los datos de los productos
     $productos_data = obtenerProductosPorListaDeIds($product_ids);
 
-   
-
-    // 3. Unir los datos de la DB con las cantidades de la sesión
+    //Unir los datos de la DB con las cantidades de la sesión
     foreach ($carrito as $id => $cantidad) {
         if (isset($productos_data[$id])) {
             $producto = $productos_data[$id];
@@ -123,7 +120,6 @@ if (!empty($carrito)) {
                                                 </div>
                                             </div>
                                             
-                                            <!-- Controles de Cantidad y Eliminación -->
                                             <div class="d-flex align-items-center">
                                                 <div class="d-flex me-4" style="width: 150px;"> 
                                                     
@@ -141,7 +137,7 @@ if (!empty($carrito)) {
                                                         </button>
                                                     </form>
 
-                                                    <!-- INPUT DE CANTIDAD (Parte del formulario principal) -->
+                                                    <!-- INPUT DE CANTIDAD -->
                                                     <input type="number" 
                                                         name="cantidades[<?php echo $item['id']; ?>]" 
                                                         value="<?php echo $item['cantidad']; ?>" 

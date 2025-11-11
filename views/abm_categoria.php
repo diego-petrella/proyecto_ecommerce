@@ -1,14 +1,13 @@
 <?php
 session_start();
-
-require '../controllers/verificacion_usuario.php';
+require __DIR__ . '/../controllers/verificacion_usuario.php';
 rolRequerido(1);
 
-require "../models/funciones.php";
+if (!defined('BASE_URL')) { define('BASE_URL', '/programacion2/articulos/'); }
 
+require __DIR__ . "/../models/funciones.php";
 
-$id = isset($_GET["id"]) ? $_GET["id"] : 0;
-
+$id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
 $categoria = [
     "id" => 0,
@@ -17,72 +16,62 @@ $categoria = [
 $titulo = "Crear Nueva Categoría";
 
 if ($id != 0) {
-    
     $datos = buscarCategoriaPorId($id);
     
     if ($datos) {
         $categoria = $datos;
         $titulo = "Modificar Categoría ID: " . $id;
     } else {
-        
-        header("Location: categorias.php?error=no_existe");
+        $redirect_ajax = "javascript:loadPage('categorias.php', 'categorias')";
+        echo "<script>alert('Categoría no encontrada. Volviendo al listado.'); window.location.href = '$redirect_ajax';</script>";
         exit;
     }
 }
 
-$admin_email = $_SESSION['usuario_email'] ?? 'Administrador';
+if (!isset($es_contenido_ajax) || $es_contenido_ajax !== true) {
+    require '../includes/admin_nav.php'; 
+}
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo $titulo ?> | Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-</head>
-<body>
+<div class="container-fluid py-3">
+    
+    <h1 class="mb-4"><?php echo $titulo ?></h1>
 
-    <header class="bg-dark text-white p-3 shadow-sm mb-4">
-        <div class="container-fluid">
-            <h1 class="h4 m-0"><i class="bi bi-tags-fill me-2"></i> Gestión de Categorías</h1>
-        </div>
-    </header>
-
-    <div class="container my-5">
+    <div class="card p-4 shadow-lg mx-auto" style="max-width: 500px;">
         
-        <div class="card p-4 shadow-lg mx-auto" style="max-width: 500px;">
-            
-            <h2 class="text-center mb-4 border-bottom pb-3">
-                <i class="bi bi-<?php echo ($id == 0) ? "plus-circle" : "pencil-square" ?> me-2"></i> 
-                <?php echo $titulo ?>
-            </h2>
-            
-            <form method="post" action="../controllers/categoria_guardar.php" autocomplete="off">
+    <form id="abmCategoriaForm" class="js-ajax-form" 
+    data-success-page="categorias.php" 
+    data-success-view="categorias" 
+    action="<?php echo BASE_URL; ?>controllers/categoria_guardar.php" method="POST"> 
+    
+    <?php if ($id != 0) { ?>
+        <input type="hidden" name="id" value="<?php echo htmlspecialchars($categoria["id"]) ?>" />
+    <?php } ?>
 
-                <?php if ($id != 0) { ?>
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($categoria["id"]) ?>" />
-                <?php } ?>
-
-                <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre de la Categoría</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" 
-                        value="<?php echo htmlspecialchars($categoria["nombre"]) ?>" required>
-                </div>
-
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg me-3">
-                        <i class="bi bi-save me-2"></i> Guardar
-                    </button>
-                    <a href="categorias.php" class="btn btn-secondary btn-lg">
-                        <i class="bi bi-x-circle me-2"></i> Cancelar
-                    </a>
-                </div>
-            </form>
-            
-        </div>
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre de la Categoría</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" 
+            value="<?php echo htmlspecialchars($categoria["nombre"] ?? '') ?>" required>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <div class="text-center mt-4 border-top pt-3">
+        <button type="submit" class="btn btn-primary btn-lg me-3">
+            <i class="bi bi-save me-2"></i> Guardar
+        </button>
+        
+        <a href="javascript:void(0);" onclick="loadPage('categorias.php', 'categorias')" class="btn btn-secondary btn-lg">
+            <i class="bi bi-x-circle me-2"></i> Cancelar
+        </a>
+    </div>
+</form>
+        
+    </div>
+</div>
+<?php 
+// Si accedimos directamente a la página, cerramos el HTML
+if (!isset($es_contenido_ajax) || $es_contenido_ajax !== true) {
+    echo '</div> ';
+    echo '</div> ';
+    echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>';
+    echo '</body></html>';
+}
+?>

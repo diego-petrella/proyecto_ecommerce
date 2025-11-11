@@ -50,6 +50,7 @@ $precio = (float)($_POST["precio"] ?? 0.00);
 $descripcion_corta = $_POST["descripcion_corta"];
 $stock = (int)($_POST["stock"] ?? 0);
 $marca = $_POST["id_categoria"];
+$activo = (int)($_POST["activo"] ?? 0);
 
 $articulo = [
     "nombre" => $nombre_articulo,
@@ -57,7 +58,8 @@ $articulo = [
     "descripcion_corta" => $descripcion_corta,
     "stock" => $stock,
     "id_categoria" => $marca,
-    "imagen" => $nombre_final 
+    "imagen" => $nombre_final,
+    "activo" => $activo 
 ];
 
 $hay_nueva_imagen = ($nombre_final !== null);

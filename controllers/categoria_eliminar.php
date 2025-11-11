@@ -1,23 +1,43 @@
 <?php
+
 session_start();
-require '../controllers/verificacion_usuario.php';
-rolRequerido(1);
+require '../models/funciones.php'; 
 
-require "../models/funciones.php";
+header('Content-Type: application/json');
 
-$id = (int)($_GET["id"] ?? 0);
+$input = json_decode(file_get_contents('php://input'), true);
+$id_categoria = $input['id'] ?? 0;
 
-if ($id <= 0) {
-    header("Location: ../views/categorias.php?error=id_invalido");
+if ($id_categoria == 0) {
+    echo json_encode(['estado' => 'error', 'mensaje' => 'Error: No se recibió un ID de categoría válido.']);
     exit;
 }
 
 
-if (eliminarCategoria($id)) {
-    
-    header("Location: ../views/categorias.php?success=eliminado");
+$conteo_productos = contarProductosPorCategoria($id_categoria);
+
+if ($conteo_productos > 0) {
+    echo json_encode([
+        'estado' => 'error',
+        'mensaje' => "No se puede desactivar: Esta categoría tiene {$conteo_productos} productos activos asociados."
+    ]);
+    exit;
+}
+
+
+$exito = desactivarCategoria($id_categoria); 
+
+
+if ($exito) {
+    echo json_encode([
+        'estado' => 'ok',
+        'mensaje' => 'Categoría desactivada con éxito.'
+    ]);
 } else {
-    
-    header("Location: ../views/categorias.php?error=no_se_puede_eliminar");
+    echo json_encode([
+        'estado' => 'error',
+        'mensaje' => 'Error al desactivar la categoría en la base de datos.'
+    ]);
 }
 exit;
+?>

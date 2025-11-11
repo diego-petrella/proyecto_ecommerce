@@ -20,8 +20,6 @@ if ($usuario) {
     if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
         
         $redirect_url = $_POST['redirect_url'];
-
-        // Verificación de seguridad simple:
         
         if (substr($redirect_url, 0, 1) === '/') {
             header("Location: " . $redirect_url);
@@ -45,7 +43,7 @@ if ($usuario) {
     exit;
 
 } else {
-    //FALLO DE AUTENTICACIÓN
+ 
     $_SESSION['login_error'] = "Email o contraseña incorrectos.";
     header("Location: /programacion2/articulos/views/login.php");
     exit;

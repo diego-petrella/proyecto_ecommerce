@@ -1,7 +1,7 @@
 <?php
 session_start();
-//require '../models/funciones.php'; 
-require_once __DIR__ . '/../models/funciones.php';
+require '../models/funciones.php'; 
+
 header('Content-Type: application/json');
 
 
@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['usuario_rol_id'])
     echo json_encode(['estado' => 'error', 'mensaje' => 'Acceso denegado.']);
     exit;
 }
+
 
 $input = json_decode(file_get_contents('php://input'), true);
 $id_articulo = $input['id'] ?? 0;
@@ -18,19 +19,17 @@ if ($id_articulo == 0) {
     exit;
 }
 
-
-$exito = desactivarArticulo($id_articulo); 
-
+$exito = restaurarArticulo($id_articulo); 
 
 if ($exito) {
     echo json_encode([
         'estado' => 'ok',
-        'mensaje' => 'Artículo desactivado con éxito.'
+        'mensaje' => 'Artículo restaurado con éxito.'
     ]);
 } else {
     echo json_encode([
         'estado' => 'error',
-        'mensaje' => 'Error al desactivar el artículo en la base de datos.'
+        'mensaje' => 'Error al restaurar el artículo en la base de datos.'
     ]);
 }
 exit;

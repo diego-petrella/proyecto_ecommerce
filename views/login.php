@@ -25,8 +25,7 @@ unset($_SESSION['login_error']);
 
 $url_destino = '';
 if (isset($_GET['url_destino'])) {
-    // Usamos htmlspecialchars por seguridad al ponerlo en el 'value' del input
-    // urldecode es importante por si la URL viene codificada
+    
     $url_destino = htmlspecialchars(urldecode($_GET['url_destino']));
 }
 ?>
@@ -90,7 +89,7 @@ if (isset($_GET['url_destino'])) {
                     </form>
 
                     <div class="mt-3 text-center">
-                        <small class="text-muted">¿No tienes cuenta? <a href="#">Regístrate aquí</a></small>
+                        <small class="text-muted">¿No tienes cuenta? <a href="registro.php">Regístrate aquí</a></small>
                     </div>
 
                 </div>

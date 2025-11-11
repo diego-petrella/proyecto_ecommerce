@@ -8,16 +8,19 @@ $offset = ($pagina_actual - 1) * $items_por_pagina;
 
 $filtro_nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : "";
 $filtro_marca = isset($_GET['id_categoria']) ? $_GET['id_categoria'] : 0;
+$filtro_estado = isset($_GET['estado']) ? $_GET['estado'] : 1;
 
+$total_articulos = contarTotalArticulos($filtro_nombre, $filtro_marca, $filtro_estado);
 
-$total_articulos = contarTotalArticulos($filtro_nombre, $filtro_marca); 
 $total_paginas = ceil($total_articulos / $items_por_pagina);
 $total_items_carrito = contarProductosCarrito();
 
 
-$articulos = obtenerArticulos($filtro_nombre, $filtro_marca, $items_por_pagina, $offset); 
+$articulos = obtenerArticulos($filtro_nombre, $filtro_marca, $filtro_estado, $items_por_pagina, $offset); 
 
-$categorias_lista = obtenerCategorias();
+$categorias_lista = obtenerTodasCategoriasActivas();
+
+$filtro_nombre = "";
 
 $usuario_logueado = isset($_SESSION['usuario_id']);
 $cliente_email = $_SESSION['usuario_email'] ?? null;
